@@ -30,7 +30,7 @@ Collaboration
 Collaborated with Qianxi Li, qianxi@ualberta.ca about possible 
 approaches to keep security
 
-Reference
+Citation
 ========================
 
 Cited code from 成西风, https://blog.csdn.net/weixin_29609679 at 
