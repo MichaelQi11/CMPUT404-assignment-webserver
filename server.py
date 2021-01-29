@@ -64,6 +64,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         # Get request url
         splited = self.data.splitlines()
         request_url = splited[0].decode("utf-8")
+        host = "http://127.0.0.1:8080"
         # Get request method
         method = request_url.split()[0]
         if (method != "GET"):
@@ -74,7 +75,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         else:
             root = os.path.abspath("www")
             filename = request_url.split()[1]
-            # Set defaul html
+            # Set default html
             if (filename.endswith("/")):
                 filename += "index.html"
             filepath = os.path.abspath("www" + filename)
@@ -91,36 +92,25 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 # The response structure and open file are stolen from 成西风, https://blog.csdn.net/weixin_29609679
                 # From CSDN
                 # https://blog.csdn.net/weixin_29609679/article/details/112713885
-                try:
-                    file = open("www" + filename, "r")
-                except FileNotFoundError:
-                    response_code = "HTTP/1.1 404 Not Found\n"
-                    response_header = "Content-Type: text/" + filetype + "\n"
-                    response_body = "The file is not found!"
-                except IsADirectoryError:
+                if (os.path.isdir("www" + filename)):
                     filename += "/"
-                    response_code = "HTTP/1.1 301 Directory Changed\n"
-                    response_header = "Content-Type: text/" + filetype + "\n"
-                    response_body = "The URL has changed to {}\n".format(filename)
-                    self.request.sendall(bytearray(response_code + response_header + "\n" + response_body, 'utf-8'))
-                    # if (filename.endswith("/")):
-                    #     filename += "index.html"
-                    # if ("." in filename):
-                    #     filetype = filename.split(".")[1]
-                    # else:
-                    #     filetype = "plain"
-                    # file = open("www" + filename, "r")
-                    # file_data = file.read()
-                    # file.close()
-                    # response_code = "HTTP/1.1 200 OK FOUND!\n"
+                    response_code = "HTTP/1.1 301 Moved Permanently\n"
                     # response_header = "Content-Type: text/" + filetype + "\n"
-                    # response_body = file_data
+                    response_header = "Location: {0}{1}\n".format(host, filename)
+                    response_body = "The URL has changed to {}\n".format(filename)
                 else:
-                    file_data = file.read()
-                    file.close()
-                    response_code = "HTTP/1.1 200 OK FOUND!\n"
-                    response_header = "Content-Type: text/" + filetype + "\n"
-                    response_body = file_data
+                    try:
+                        file = open("www" + filename, "r")
+                    except FileNotFoundError:
+                        response_code = "HTTP/1.1 404 Not Found\n"
+                        response_header = "Content-Type: text/" + filetype + "\n"
+                        response_body = "The file is not found!"
+                    else:
+                        file_data = file.read()
+                        file.close()
+                        response_code = "HTTP/1.1 200 OK FOUND!\n"
+                        response_header = "Content-Type: text/" + filetype + "\n"
+                        response_body = file_data
 
         self.request.sendall(bytearray(response_code + response_header + "\n" + response_body, 'utf-8'))
 
